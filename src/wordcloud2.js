@@ -96,6 +96,9 @@ if (!window.clearImmediate) {
     }
 
     var ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return false;
+    }
     if (!ctx.getImageData) {
       return false;
     }
@@ -199,6 +202,7 @@ if (!window.clearImmediate) {
 
       minRotation: - Math.PI / 2,
       maxRotation: Math.PI / 2,
+      rotationSteps: 0,
 
       shuffle: true,
       rotateRatio: 0.1,
@@ -245,25 +249,32 @@ if (!window.clearImmediate) {
           break;
 
         /*
-
         To work out an X-gon, one has to calculate "m",
         where 1/(cos(2*PI/X)+m*sin(2*PI/X)) = 1/(cos(0)+m*sin(0))
         http://www.wolframalpha.com/input/?i=1%2F%28cos%282*PI%2FX%29%2Bm*sin%28
         2*PI%2FX%29%29+%3D+1%2F%28cos%280%29%2Bm*sin%280%29%29
-
         Copy the solution into polar equation r = 1/(cos(t') + m*sin(t'))
         where t' equals to mod(t, 2PI/X);
-
         */
 
         case 'diamond':
-        case 'square':
           // http://www.wolframalpha.com/input/?i=plot+r+%3D+1%2F%28cos%28mod+
           // %28t%2C+PI%2F2%29%29%2Bsin%28mod+%28t%2C+PI%2F2%29%29%29%2C+t+%3D
           // +0+..+2*PI
           settings.shape = function shapeSquare(theta) {
             var thetaPrime = theta % (2 * Math.PI / 4);
             return 1 / (Math.cos(thetaPrime) + Math.sin(thetaPrime));
+          };
+          break;
+
+        case 'square':
+          // http://www.wolframalpha.com/input/?i=plot+r+%3D+min(1%2Fabs(cos(t
+          // )),1%2Fabs(sin(t)))),+t+%3D+0+..+2*PI
+          settings.shape = function shapeSquare(theta) {
+            return Math.min(
+              1 / Math.abs(Math.cos(theta)),
+              1 / Math.abs(Math.sin(theta))
+            );
           };
           break;
 
@@ -319,6 +330,7 @@ if (!window.clearImmediate) {
 
     /* normalize rotation settings */
     var rotationRange = Math.abs(settings.maxRotation - settings.minRotation);
+    var rotationSteps = Math.abs(Math.floor(settings.rotationSteps));
     var minRotation = Math.min(settings.maxRotation, settings.minRotation);
 
     /* information/object available to all functions, set when start() */
@@ -358,6 +370,12 @@ if (!window.clearImmediate) {
         break;
     }
 
+    /* function for getting the font-weight of the text */
+    var getTextFontWeight;
+    if (typeof settings.fontWeight === 'function') {
+      getTextFontWeight = settings.fontWeight;
+    }
+
     /* function for getting the classes of the text */
     var getTextClasses = null;
     if (typeof settings.classes === 'function') {
@@ -388,8 +406,12 @@ if (!window.clearImmediate) {
 
       var x = Math.floor(eventX * ((canvas.width / rect.width) || 1) / g);
       var y = Math.floor(eventY * ((canvas.height / rect.height) || 1) / g);
-
-      return infoGrid[x][y];
+	  
+	  var info = null;
+	  if (infoGrid[x] && infoGrid[x][y]) {
+		info = infoGrid[x][y];
+	  }
+	  return info;      
     };
 
     var wordcloudhover = function wordcloudhover(evt) {
@@ -477,7 +499,15 @@ if (!window.clearImmediate) {
         return minRotation;
       }
 
-      return minRotation + Math.random() * rotationRange;
+      if (rotationSteps > 0) {
+        // Min rotation + zero or more steps * span of one step
+        return minRotation +
+          Math.floor(Math.random() * rotationSteps) *
+          rotationRange / (rotationSteps - 1);
+      }
+      else {
+        return minRotation + Math.random() * rotationRange;
+      }
     };
 
     var getTextInfo = function getTextInfo(word, weight, rotateDeg) {
@@ -504,10 +534,18 @@ if (!window.clearImmediate) {
         })();
       }
 
+      // Get fontWeight that will be used to set fctx.font
+      var fontWeight;
+      if (getTextFontWeight) {
+        fontWeight = getTextFontWeight(word, weight, fontSize);
+      } else {
+        fontWeight = settings.fontWeight;
+      }
+
       var fcanvas = document.createElement('canvas');
       var fctx = fcanvas.getContext('2d', { willReadFrequently: true });
 
-      fctx.font = settings.fontWeight + ' ' +
+      fctx.font = fontWeight + ' ' +
         (fontSize * mu).toString(10) + 'px ' + settings.fontFamily;
 
       // Estimate the dimension of the text with measureText().
@@ -560,7 +598,7 @@ if (!window.clearImmediate) {
 
       // Once the width/height is set, ctx info will be reset.
       // Set it again here.
-      fctx.font = settings.fontWeight + ' ' +
+      fctx.font = fontWeight + ' ' +
         (fontSize * mu).toString(10) + 'px ' + settings.fontFamily;
 
       // Fill the text into the fcanvas.
@@ -691,9 +729,17 @@ if (!window.clearImmediate) {
         color = settings.color;
       }
 
+      // get fontWeight that will be used to set ctx.font and font style rule
+      var fontWeight;
+      if (getTextFontWeight) {
+        fontWeight = getTextFontWeight(word, weight, fontSize);
+      } else {
+        fontWeight = settings.fontWeight;
+      }
+
       var classes;
       if (getTextClasses) {
-        classes = getTextClasses(word, weight, fontSize, distance, theta);
+        classes = getTextClasses(word, weight, fontSize);
       } else {
         classes = settings.classes;
       }
@@ -716,7 +762,7 @@ if (!window.clearImmediate) {
           ctx.save();
           ctx.scale(1 / mu, 1 / mu);
 
-          ctx.font = settings.fontWeight + ' ' +
+          ctx.font = fontWeight + ' ' +
                      (fontSize * mu).toString(10) + 'px ' + settings.fontFamily;
           ctx.fillStyle = color;
 
@@ -759,7 +805,7 @@ if (!window.clearImmediate) {
           var styleRules = {
             'position': 'absolute',
             'display': 'block',
-            'font': settings.fontWeight + ' ' +
+            'font': fontWeight + ' ' +
                     (fontSize * info.mu) + 'px ' + settings.fontFamily,
             'left': ((gx + info.gw / 2) * g + info.fillTextOffsetX) + 'px',
             'top': ((gy + info.gh / 2) * g + info.fillTextOffsetY) + 'px',
@@ -1074,12 +1120,14 @@ if (!window.clearImmediate) {
           canvas.addEventListener('mousemove', wordcloudhover);
         }
 
+        var touchend = function (e) {
+          e.preventDefault();
+        };
+
         if (settings.click) {
           canvas.addEventListener('click', wordcloudclick);
           canvas.addEventListener('touchstart', wordcloudclick);
-          canvas.addEventListener('touchend', function (e) {
-            e.preventDefault();
-          });
+          canvas.addEventListener('touchend', touchend);
           canvas.style.webkitTapHighlightColor = 'rgba(0, 0, 0, 0)';
         }
 
@@ -1088,6 +1136,8 @@ if (!window.clearImmediate) {
 
           canvas.removeEventListener('mousemove', wordcloudhover);
           canvas.removeEventListener('click', wordcloudclick);
+          canvas.removeEventListener('touchstart', wordcloudclick);
+          canvas.removeEventListener('touchend', touchend);
           hovered = undefined;
         });
       }
