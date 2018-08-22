@@ -116,6 +116,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (option.tooltip && option.tooltip.show === true) {
 	                if (!this._tooltip) {
 	                    this._tooltip = window.document.createElement('div');
+	                    this._wrapper = window.document.createElement('div');
 	                    this._tooltip.className = "__wc_tooltip__";
 	                    this._tooltip.style.backgroundColor = option.tooltip.backgroundColor || 'rgba(0, 0, 0, 0.701961)';
 	                    this._tooltip.style.color = '#fff';
