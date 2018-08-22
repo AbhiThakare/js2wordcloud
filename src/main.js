@@ -127,7 +127,7 @@ export class Js2WordCloud {
     }
 
     resize() {
-		if(this._container && this._canvas){
+		if(this._container){
 			this._canvas.width = this._container.clientWidth
 			this._canvas.height = this._container.clientHeight
 			_renderShape.call(this, this._option)
@@ -136,7 +136,7 @@ export class Js2WordCloud {
     }
 
     _init() {
-		if(this._container && this._canvas){
+		if(this._container){
 			let width = this._container.clientWidth;
 			let height = this._container.clientHeight;
 			this._container.innerHTML = ''
@@ -224,7 +224,7 @@ function _sortWorldCloud(option) {
 }
 
 function _renderShape(option) {
-    if (this._maskCanvas && this._canvas) {
+    if (this._maskCanvas) {
         option.clearCanvas = false
 
         /* Determine bgPixel by creating
@@ -236,8 +236,8 @@ function _renderShape(option) {
         var bgPixel = bctx.getImageData(0, 0, 1, 1).data
 
         var maskCanvasScaled = window.document.createElement('canvas')
-        maskCanvasScaled.width = this._canvas.width
-        maskCanvasScaled.height = this._canvas.height
+        maskCanvasScaled.width = (this._canvas) ? this._canvas.width : 0
+        maskCanvasScaled.height = (this._canvas) ? this._canvas.height : 0
         var ctx = maskCanvasScaled.getContext('2d')
 
         ctx.drawImage(this._maskCanvas,

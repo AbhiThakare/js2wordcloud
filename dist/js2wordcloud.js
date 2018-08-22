@@ -192,7 +192,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'resize',
 	        value: function resize() {
-	            if (this._container && this._canvas) {
+	            if (this._container) {
 	                this._canvas.width = this._container.clientWidth;
 	                this._canvas.height = this._container.clientHeight;
 	                _renderShape.call(this, this._option);
@@ -202,7 +202,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: '_init',
 	        value: function _init() {
-	            if (this._container && this._canvas) {
+	            if (this._container) {
 	                var width = this._container.clientWidth;
 	                var height = this._container.clientHeight;
 	                this._container.innerHTML = '';
@@ -298,7 +298,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function _renderShape(option) {
-	    if (this._maskCanvas && this._canvas) {
+	    if (this._maskCanvas) {
 	        option.clearCanvas = false;
 
 	        /* Determine bgPixel by creating
@@ -310,8 +310,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var bgPixel = bctx.getImageData(0, 0, 1, 1).data;
 
 	        var maskCanvasScaled = window.document.createElement('canvas');
-	        maskCanvasScaled.width = this._canvas.width;
-	        maskCanvasScaled.height = this._canvas.height;
+	        maskCanvasScaled.width = this._canvas ? this._canvas.width : 0;
+	        maskCanvasScaled.height = this._canvas ? this._canvas.height : 0;
 	        var ctx = maskCanvasScaled.getContext('2d');
 
 	        ctx.drawImage(this._maskCanvas, 0, 0, this._maskCanvas.width, this._maskCanvas.height, 0, 0, maskCanvasScaled.width, maskCanvasScaled.height);
