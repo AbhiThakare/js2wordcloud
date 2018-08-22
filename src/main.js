@@ -9,16 +9,17 @@ const LODAING_WRAPPTER_HTML_END = '</div></div></div>'
 
 export class Js2WordCloud {
     constructor(element) {
-        this._container = element
-        this._wrapper = null
-        this._canvas = null
-        this._maskCanvas = null
-        this._dataMask = null
-        this._tooltip = null
-
-        this._wordcloud2 = null
-        this._option = null
-        this._init()
+		if(element){
+			this._container = element
+			this._wrapper = null
+			this._canvas = null
+			this._maskCanvas = null
+			this._dataMask = null
+			this._tooltip = null
+			this._wordcloud2 = null
+			this._option = null
+			this._init()
+		}
     }
 
     setOption(option) {
