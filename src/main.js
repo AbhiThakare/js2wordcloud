@@ -9,17 +9,15 @@ const LODAING_WRAPPTER_HTML_END = '</div></div></div>'
 
 export class Js2WordCloud {
     constructor(element) {
-		if(element){
-			this._container = element
-			this._wrapper = null
-			this._canvas = null
-			this._maskCanvas = null
-			this._dataMask = null
-			this._tooltip = null
-			this._wordcloud2 = null
-			this._option = null
-			this._init()
-		}
+		this._container = element
+		this._wrapper = null
+		this._canvas = null
+		this._maskCanvas = null
+		this._dataMask = null
+		this._tooltip = null
+		this._wordcloud2 = null
+		this._option = null
+		this._init()
     }
 
     setOption(option) {
@@ -126,41 +124,45 @@ export class Js2WordCloud {
     }
 
     resize() {
-        this._canvas.width = this._container.clientWidth
-        this._canvas.height = this._container.clientHeight
-        _renderShape.call(this, this._option)
-        // this._wordcloud2 = WordCloud(this._canvas, this._option)
+		if(this._container){
+			this._canvas.width = this._container.clientWidth
+			this._canvas.height = this._container.clientHeight
+			_renderShape.call(this, this._option)
+			// this._wordcloud2 = WordCloud(this._canvas, this._option)
+		}        
     }
 
     _init() {
-        let width = this._container.clientWidth;
-        let height = this._container.clientHeight;
-        this._container.innerHTML = ''
+		if(this._container){
+			let width = this._container.clientWidth;
+			let height = this._container.clientHeight;
+			this._container.innerHTML = ''
 
-        this._wrapper = window.document.createElement('div')
-        this._wrapper.style.position = 'relative'
-        this._wrapper.style.width = '100%'
-        this._wrapper.style.height = 'inherit'
+			this._wrapper = window.document.createElement('div')
+			this._wrapper.style.position = 'relative'
+			this._wrapper.style.width = '100%'
+			this._wrapper.style.height = 'inherit'
 
-        this._dataMask = window.document.createElement('div')
-        this._dataMask.height = 'inherit'
-        this._dataMask.style.textAlign = 'center'
-        this._dataMask.style.color = '#888'
-        this._dataMask.style.fontSize = '14px'
-        this._dataMask.style.position = 'absolute'
-        this._dataMask.style.left = '0'
-        this._dataMask.style.right = '0'
-        this._dataMask.style.top = '0'
-        this._dataMask.style.bottom = '0'
-        this._dataMask.style.display = 'none'
+			this._dataMask = window.document.createElement('div')
+			this._dataMask.height = 'inherit'
+			this._dataMask.style.textAlign = 'center'
+			this._dataMask.style.color = '#888'
+			this._dataMask.style.fontSize = '14px'
+			this._dataMask.style.position = 'absolute'
+			this._dataMask.style.left = '0'
+			this._dataMask.style.right = '0'
+			this._dataMask.style.top = '0'
+			this._dataMask.style.bottom = '0'
+			this._dataMask.style.display = 'none'
 
-        this._wrapper.appendChild(this._dataMask)
-        this._container.appendChild(this._wrapper)
+			this._wrapper.appendChild(this._dataMask)
+			this._container.appendChild(this._wrapper)
 
-        this._canvas = window.document.createElement('canvas')
-        this._canvas.width = width
-        this._canvas.height = height
-        this._wrapper.appendChild(this._canvas)
+			this._canvas = window.document.createElement('canvas')
+			this._canvas.width = width
+			this._canvas.height = height
+			this._wrapper.appendChild(this._canvas)
+		}        
     }
 
     _fixWeightFactor(option) {
