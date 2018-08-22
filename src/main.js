@@ -63,9 +63,11 @@ export class Js2WordCloud {
                 this._tooltip.style.zIndex = 999
                 this._tooltip.style.display = 'none'
                 this._wrapper.appendChild(this._tooltip)
-                this._container.onmouseout = () => {
-                    this._tooltip.style.display = 'none'
-                }
+				if(this._container){
+					this._container.onmouseout = () => {
+						this._tooltip.style.display = 'none'
+					}	
+				}                
             }
             this._option.hover = hoverCb
         }
