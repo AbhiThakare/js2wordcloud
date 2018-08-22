@@ -192,7 +192,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'resize',
 	        value: function resize() {
-	            if (this._container) {
+	            if (this._container && this._canvas) {
 	                this._canvas.width = this._container.clientWidth;
 	                this._canvas.height = this._container.clientHeight;
 	                _renderShape.call(this, this._option);
@@ -202,7 +202,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: '_init',
 	        value: function _init() {
-	            if (this._container) {
+	            if (this._container && this._canvas) {
 	                var width = this._container.clientWidth;
 	                var height = this._container.clientHeight;
 	                this._container.innerHTML = '';
@@ -298,7 +298,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function _renderShape(option) {
-	    if (this._maskCanvas) {
+	    if (this._maskCanvas && this._canvas) {
 	        option.clearCanvas = false;
 
 	        /* Determine bgPixel by creating

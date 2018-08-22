@@ -127,7 +127,7 @@ export class Js2WordCloud {
     }
 
     resize() {
-		if(this._container){
+		if(this._container && this._canvas){
 			this._canvas.width = this._container.clientWidth
 			this._canvas.height = this._container.clientHeight
 			_renderShape.call(this, this._option)
@@ -136,7 +136,7 @@ export class Js2WordCloud {
     }
 
     _init() {
-		if(this._container){
+		if(this._container && this._canvas){
 			let width = this._container.clientWidth;
 			let height = this._container.clientHeight;
 			this._container.innerHTML = ''
@@ -224,7 +224,7 @@ function _sortWorldCloud(option) {
 }
 
 function _renderShape(option) {
-    if (this._maskCanvas) {
+    if (this._maskCanvas && this._canvas) {
         option.clearCanvas = false
 
         /* Determine bgPixel by creating
