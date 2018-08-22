@@ -81,7 +81,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._maskCanvas = null;
 	        this._dataMask = null;
 	        this._tooltip = null;
-
 	        this._wordcloud2 = null;
 	        this._option = null;
 	        this._init();
@@ -190,42 +189,46 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'resize',
 	        value: function resize() {
-	            this._canvas.width = this._container.clientWidth;
-	            this._canvas.height = this._container.clientHeight;
-	            _renderShape.call(this, this._option);
-	            // this._wordcloud2 = WordCloud(this._canvas, this._option)
+	            if (this._container) {
+	                this._canvas.width = this._container.clientWidth;
+	                this._canvas.height = this._container.clientHeight;
+	                _renderShape.call(this, this._option);
+	                // this._wordcloud2 = WordCloud(this._canvas, this._option)
+	            }
 	        }
 	    }, {
 	        key: '_init',
 	        value: function _init() {
-	            var width = this._container.clientWidth;
-	            var height = this._container.clientHeight;
-	            this._container.innerHTML = '';
+	            if (this._container) {
+	                var width = this._container.clientWidth;
+	                var height = this._container.clientHeight;
+	                this._container.innerHTML = '';
 
-	            this._wrapper = window.document.createElement('div');
-	            this._wrapper.style.position = 'relative';
-	            this._wrapper.style.width = '100%';
-	            this._wrapper.style.height = 'inherit';
+	                this._wrapper = window.document.createElement('div');
+	                this._wrapper.style.position = 'relative';
+	                this._wrapper.style.width = '100%';
+	                this._wrapper.style.height = 'inherit';
 
-	            this._dataMask = window.document.createElement('div');
-	            this._dataMask.height = 'inherit';
-	            this._dataMask.style.textAlign = 'center';
-	            this._dataMask.style.color = '#888';
-	            this._dataMask.style.fontSize = '14px';
-	            this._dataMask.style.position = 'absolute';
-	            this._dataMask.style.left = '0';
-	            this._dataMask.style.right = '0';
-	            this._dataMask.style.top = '0';
-	            this._dataMask.style.bottom = '0';
-	            this._dataMask.style.display = 'none';
+	                this._dataMask = window.document.createElement('div');
+	                this._dataMask.height = 'inherit';
+	                this._dataMask.style.textAlign = 'center';
+	                this._dataMask.style.color = '#888';
+	                this._dataMask.style.fontSize = '14px';
+	                this._dataMask.style.position = 'absolute';
+	                this._dataMask.style.left = '0';
+	                this._dataMask.style.right = '0';
+	                this._dataMask.style.top = '0';
+	                this._dataMask.style.bottom = '0';
+	                this._dataMask.style.display = 'none';
 
-	            this._wrapper.appendChild(this._dataMask);
-	            this._container.appendChild(this._wrapper);
+	                this._wrapper.appendChild(this._dataMask);
+	                this._container.appendChild(this._wrapper);
 
-	            this._canvas = window.document.createElement('canvas');
-	            this._canvas.width = width;
-	            this._canvas.height = height;
-	            this._wrapper.appendChild(this._canvas);
+	                this._canvas = window.document.createElement('canvas');
+	                this._canvas.width = width;
+	                this._canvas.height = height;
+	                this._wrapper.appendChild(this._canvas);
+	            }
 	        }
 	    }, {
 	        key: '_fixWeightFactor',
@@ -528,6 +531,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      var ctx = canvas.getContext('2d');
+	      if (!ctx) {
+	        return false;
+	      }
 	      if (!ctx.getImageData) {
 	        return false;
 	      }
@@ -626,6 +632,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        minRotation: -Math.PI / 2,
 	        maxRotation: Math.PI / 2,
+	        rotationSteps: 0,
 
 	        shuffle: true,
 	        rotateRatio: 0.1,
@@ -672,22 +679,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	            break;
 
 	          /*
-	            To work out an X-gon, one has to calculate "m",
+	          To work out an X-gon, one has to calculate "m",
 	          where 1/(cos(2*PI/X)+m*sin(2*PI/X)) = 1/(cos(0)+m*sin(0))
 	          http://www.wolframalpha.com/input/?i=1%2F%28cos%282*PI%2FX%29%2Bm*sin%28
 	          2*PI%2FX%29%29+%3D+1%2F%28cos%280%29%2Bm*sin%280%29%29
-	            Copy the solution into polar equation r = 1/(cos(t') + m*sin(t'))
+	          Copy the solution into polar equation r = 1/(cos(t') + m*sin(t'))
 	          where t' equals to mod(t, 2PI/X);
-	            */
+	          */
 
 	          case 'diamond':
-	          case 'square':
 	            // http://www.wolframalpha.com/input/?i=plot+r+%3D+1%2F%28cos%28mod+
 	            // %28t%2C+PI%2F2%29%29%2Bsin%28mod+%28t%2C+PI%2F2%29%29%29%2C+t+%3D
 	            // +0+..+2*PI
 	            settings.shape = function shapeSquare(theta) {
 	              var thetaPrime = theta % (2 * Math.PI / 4);
 	              return 1 / (Math.cos(thetaPrime) + Math.sin(thetaPrime));
+	            };
+	            break;
+
+	          case 'square':
+	            // http://www.wolframalpha.com/input/?i=plot+r+%3D+min(1%2Fabs(cos(t
+	            // )),1%2Fabs(sin(t)))),+t+%3D+0+..+2*PI
+	            settings.shape = function shapeSquare(theta) {
+	              return Math.min(1 / Math.abs(Math.cos(theta)), 1 / Math.abs(Math.sin(theta)));
 	            };
 	            break;
 
@@ -738,6 +752,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      /* normalize rotation settings */
 	      var rotationRange = Math.abs(settings.maxRotation - settings.minRotation);
+	      var rotationSteps = Math.abs(Math.floor(settings.rotationSteps));
 	      var minRotation = Math.min(settings.maxRotation, settings.minRotation);
 
 	      /* information/object available to all functions, set when start() */
@@ -774,6 +789,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	          break;
 	      }
 
+	      /* function for getting the font-weight of the text */
+	      var getTextFontWeight;
+	      if (typeof settings.fontWeight === 'function') {
+	        getTextFontWeight = settings.fontWeight;
+	      }
+
 	      /* function for getting the classes of the text */
 	      var getTextClasses = null;
 	      if (typeof settings.classes === 'function') {
@@ -804,7 +825,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var x = Math.floor(eventX * (canvas.width / rect.width || 1) / g);
 	        var y = Math.floor(eventY * (canvas.height / rect.height || 1) / g);
 
-	        return infoGrid[x][y];
+	        var info = null;
+	        if (infoGrid[x] && infoGrid[x][y]) {
+	          info = infoGrid[x][y];
+	        }
+	        return info;
 	      };
 
 	      var wordcloudhover = function wordcloudhover(evt) {
@@ -886,7 +911,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	          return minRotation;
 	        }
 
-	        return minRotation + Math.random() * rotationRange;
+	        if (rotationSteps > 0) {
+	          // Min rotation + zero or more steps * span of one step
+	          return minRotation + Math.floor(Math.random() * rotationSteps) * rotationRange / (rotationSteps - 1);
+	        } else {
+	          return minRotation + Math.random() * rotationRange;
+	        }
 	      };
 
 	      var getTextInfo = function getTextInfo(word, weight, rotateDeg) {
@@ -913,10 +943,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }();
 	        }
 
+	        // Get fontWeight that will be used to set fctx.font
+	        var fontWeight;
+	        if (getTextFontWeight) {
+	          fontWeight = getTextFontWeight(word, weight, fontSize);
+	        } else {
+	          fontWeight = settings.fontWeight;
+	        }
+
 	        var fcanvas = document.createElement('canvas');
 	        var fctx = fcanvas.getContext('2d', { willReadFrequently: true });
 
-	        fctx.font = settings.fontWeight + ' ' + (fontSize * mu).toString(10) + 'px ' + settings.fontFamily;
+	        fctx.font = fontWeight + ' ' + (fontSize * mu).toString(10) + 'px ' + settings.fontFamily;
 
 	        // Estimate the dimension of the text with measureText().
 	        var fw = fctx.measureText(word).width / mu;
@@ -964,7 +1002,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        // Once the width/height is set, ctx info will be reset.
 	        // Set it again here.
-	        fctx.font = settings.fontWeight + ' ' + (fontSize * mu).toString(10) + 'px ' + settings.fontFamily;
+	        fctx.font = fontWeight + ' ' + (fontSize * mu).toString(10) + 'px ' + settings.fontFamily;
 
 	        // Fill the text into the fcanvas.
 	        // XXX: We cannot because textBaseline = 'top' here because
@@ -1090,9 +1128,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	          color = settings.color;
 	        }
 
+	        // get fontWeight that will be used to set ctx.font and font style rule
+	        var fontWeight;
+	        if (getTextFontWeight) {
+	          fontWeight = getTextFontWeight(word, weight, fontSize);
+	        } else {
+	          fontWeight = settings.fontWeight;
+	        }
+
 	        var classes;
 	        if (getTextClasses) {
-	          classes = getTextClasses(word, weight, fontSize, distance, theta);
+	          classes = getTextClasses(word, weight, fontSize);
 	        } else {
 	          classes = settings.classes;
 	        }
@@ -1115,7 +1161,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            ctx.save();
 	            ctx.scale(1 / mu, 1 / mu);
 
-	            ctx.font = settings.fontWeight + ' ' + (fontSize * mu).toString(10) + 'px ' + settings.fontFamily;
+	            ctx.font = fontWeight + ' ' + (fontSize * mu).toString(10) + 'px ' + settings.fontFamily;
 	            ctx.fillStyle = color;
 
 	            // Translate the canvas position to the origin coordinate of where
@@ -1153,7 +1199,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var styleRules = {
 	              'position': 'absolute',
 	              'display': 'block',
-	              'font': settings.fontWeight + ' ' + fontSize * info.mu + 'px ' + settings.fontFamily,
+	              'font': fontWeight + ' ' + fontSize * info.mu + 'px ' + settings.fontFamily,
 	              'left': (gx + info.gw / 2) * g + info.fillTextOffsetX + 'px',
 	              'top': (gy + info.gh / 2) * g + info.fillTextOffsetY + 'px',
 	              'width': info.fillTextWidth + 'px',
@@ -1461,12 +1507,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            canvas.addEventListener('mousemove', wordcloudhover);
 	          }
 
+	          var touchend = function touchend(e) {
+	            e.preventDefault();
+	          };
+
 	          if (settings.click) {
 	            canvas.addEventListener('click', wordcloudclick);
 	            canvas.addEventListener('touchstart', wordcloudclick);
-	            canvas.addEventListener('touchend', function (e) {
-	              e.preventDefault();
-	            });
+	            canvas.addEventListener('touchend', touchend);
 	            canvas.style.webkitTapHighlightColor = 'rgba(0, 0, 0, 0)';
 	          }
 
@@ -1475,6 +1523,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            canvas.removeEventListener('mousemove', wordcloudhover);
 	            canvas.removeEventListener('click', wordcloudclick);
+	            canvas.removeEventListener('touchstart', wordcloudclick);
+	            canvas.removeEventListener('touchend', touchend);
 	            hovered = undefined;
 	          });
 	        }
