@@ -116,7 +116,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (option.tooltip && option.tooltip.show === true) {
 	                if (!this._tooltip) {
 	                    this._tooltip = window.document.createElement('div');
-	                    this._wrapper = window.document.createElement('div');
 	                    this._tooltip.className = "__wc_tooltip__";
 	                    this._tooltip.style.backgroundColor = option.tooltip.backgroundColor || 'rgba(0, 0, 0, 0.701961)';
 	                    this._tooltip.style.color = '#fff';
@@ -132,7 +131,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    this._tooltip.style.whiteSpace = 'nowrap';
 	                    this._tooltip.style.zIndex = 999;
 	                    this._tooltip.style.display = 'none';
-	                    this._wrapper.appendChild(this._tooltip);
+	                    this._wrapper ? this._wrapper.appendChild(this._tooltip) : '';
 	                    if (this._container) {
 	                        this._container.onmouseout = function () {
 	                            _this._tooltip.style.display = 'none';
