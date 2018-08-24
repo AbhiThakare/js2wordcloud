@@ -5,7 +5,7 @@
   "main": "dist/js2wordcloud.min.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/liangbizhi/js2wordcloud.git"
+    "url": "git+https://github.com/AbhiThakare/js2wordcloud.git"
   },
   "scripts": {
     "clean": "del dist",
